@@ -25,20 +25,21 @@ var conditionIcons = map[string]string{
 }
 
 var maxCacheAge, _ = time.ParseDuration("1h")
+var cache_file = path.Join(os.TempDir(), "emoji-weather.json")
 
 func main() {
 	var json []byte
 	var err error
-	cache_file := path.Join(os.TempDir(), "emoji-weather.json")
 
 	if isCacheStale(cache_file) {
-		json, err = writeCache(cache_file)
+		json, err = getForecast()
+		check(err)
+
+		err = writeCache(cache_file, json)
+		check(err)
 	} else {
 		json, err = ioutil.ReadFile(cache_file)
-	}
-
-	if err != nil {
-		panic(err)
+		check(err)
 	}
 
 	fmt.Println(formatConditions(extractConditionFromJSON(json)))
@@ -50,7 +51,7 @@ func isCacheStale(cache_file string) bool {
 	return os.IsNotExist(err) || time.Since(stat.ModTime()) > maxCacheAge
 }
 
-func writeCache(cache_file string) (json []byte, err error) {
+func getForecast() (json []byte, err error) {
 	key := os.Getenv("FORECAST_IO_API_KEY")
 
 	if key == "" {
@@ -70,12 +71,11 @@ func writeCache(cache_file string) (json []byte, err error) {
 		return nil, err
 	}
 
-	err = ioutil.WriteFile(cache_file, json, 0644)
-	if err != nil {
-		return nil, err
-	}
-
 	return json, nil
+}
+
+func writeCache(cache_file string, json []byte) (err error) {
+	return ioutil.WriteFile(cache_file, json, 0644)
 }
 
 func formatConditions(condition string) (icon string) {
@@ -93,4 +93,10 @@ func extractConditionFromJSON(jsonBlob []byte) (condition string) {
 	}
 
 	return f.Currently.Icon
+}
+
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
