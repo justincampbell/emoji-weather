@@ -24,6 +24,30 @@ var conditionIcons = map[string]string{
 }
 
 func main() {
+	var json []byte
+	var err error
+	cache_file := path.Join(os.TempDir(), "emoji-weather.json")
+
+	if isCacheStale(cache_file) {
+		json, err = writeCache(cache_file)
+	} else {
+		json, err = ioutil.ReadFile(cache_file)
+	}
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(formatConditions(extractConditionFromJSON(json)))
+}
+
+func isCacheStale(cache_file string) bool {
+	_, err := os.Stat(cache_file)
+
+	return os.IsNotExist(err)
+}
+
+func writeCache(cache_file string) (json []byte, err error) {
 	key := os.Getenv("FORECAST_IO_API_KEY")
 
 	if key == "" {
@@ -33,32 +57,22 @@ func main() {
 	lat := "39.95"
 	long := "-75.1667"
 
-	var json []byte
-	cache_file := path.Join(os.TempDir(), "emoji-weather.json")
-
-	if _, err := os.Stat(cache_file); os.IsNotExist(err) {
-		res, err := forecast.GetResponse(key, lat, long, "now", "us")
-		if err != nil {
-			panic(err)
-		}
-
-		json, err = ioutil.ReadAll(res.Body)
-		if err != nil {
-			panic(err)
-		}
-
-		err = ioutil.WriteFile(cache_file, json, 0644)
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		json, err = ioutil.ReadFile(cache_file)
-		if err != nil {
-			panic(err)
-		}
+	res, err := forecast.GetResponse(key, lat, long, "now", "us")
+	if err != nil {
+		return nil, err
 	}
 
-	fmt.Println(formatConditions(extractConditionFromJSON(json)))
+	json, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ioutil.WriteFile(cache_file, json, 0644)
+	if err != nil {
+		return nil, err
+	}
+
+	return json, nil
 }
 
 func formatConditions(condition string) (icon string) {
