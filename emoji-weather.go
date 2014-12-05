@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"time"
 
 	"github.com/justincampbell/forecast/v2"
 )
@@ -22,6 +23,8 @@ var conditionIcons = map[string]string{
 	"snow":                "❄️",
 	"wind":                "🍃",
 }
+
+var maxCacheAge, _ = time.ParseDuration("1h")
 
 func main() {
 	var json []byte
@@ -42,9 +45,9 @@ func main() {
 }
 
 func isCacheStale(cache_file string) bool {
-	_, err := os.Stat(cache_file)
+	stat, err := os.Stat(cache_file)
 
-	return os.IsNotExist(err)
+	return os.IsNotExist(err) || time.Since(stat.ModTime()) > maxCacheAge
 }
 
 func writeCache(cache_file string) (json []byte, err error) {
