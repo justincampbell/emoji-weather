@@ -55,7 +55,7 @@ func getForecast() (json []byte, err error) {
 	key := os.Getenv("FORECAST_IO_API_KEY")
 
 	if key == "" {
-		log.Fatal("Please set your forecast.io API key")
+		log.Fatal("Please set FORECAST_IO_API_KEY to your forecast.io API key")
 	}
 
 	lat := "39.95"
