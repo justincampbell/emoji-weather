@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"strings"
@@ -74,7 +73,7 @@ func getForecast(latitude string, longitude string) (json []byte, err error) {
 	key := os.Getenv("FORECAST_IO_API_KEY")
 
 	if key == "" {
-		log.Fatal("Please set FORECAST_IO_API_KEY to your forecast.io API key")
+		exitWith("Please set FORECAST_IO_API_KEY to your forecast.io API key", 1)
 	}
 
 	res, err := forecast.GetResponse(key, latitude, longitude, "now", "us")
