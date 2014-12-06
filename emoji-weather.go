@@ -1,11 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/justincampbell/forecast/v2"
@@ -28,11 +30,25 @@ var maxCacheAge, _ = time.ParseDuration("1h")
 var cache_file = path.Join(os.TempDir(), "emoji-weather.json")
 
 func main() {
+	coordinates := flag.String("coordinates", "39.95,-75.1667", "the coordinates, expressed as latitude,longitude")
+	flag.Parse()
+
+	coordinateParts := strings.Split(*coordinates, ",")
+	var latitude string
+	var longitude string
+
+	if len(coordinateParts) != 2 {
+		exitWith("You must specify latitude and longitude like so: 39.95,-75.1667", 1)
+	} else {
+		latitude = coordinateParts[0]
+		longitude = coordinateParts[1]
+	}
+
 	var json []byte
 	var err error
 
 	if isCacheStale(cache_file) {
-		json, err = getForecast()
+		json, err = getForecast(latitude, longitude)
 		check(err)
 
 		err = writeCache(cache_file, json)
@@ -51,17 +67,14 @@ func isCacheStale(cache_file string) bool {
 	return os.IsNotExist(err) || time.Since(stat.ModTime()) > maxCacheAge
 }
 
-func getForecast() (json []byte, err error) {
+func getForecast(latitude string, longitude string) (json []byte, err error) {
 	key := os.Getenv("FORECAST_IO_API_KEY")
 
 	if key == "" {
 		log.Fatal("Please set FORECAST_IO_API_KEY to your forecast.io API key")
 	}
 
-	lat := "39.95"
-	long := "-75.1667"
-
-	res, err := forecast.GetResponse(key, lat, long, "now", "us")
+	res, err := forecast.GetResponse(key, latitude, longitude, "now", "us")
 	if err != nil {
 		return nil, err
 	}
@@ -95,8 +108,13 @@ func extractConditionFromJSON(jsonBlob []byte) (condition string) {
 	return f.Currently.Icon
 }
 
+func exitWith(message interface{}, status int) {
+	fmt.Printf("%v\n", message)
+	os.Exit(status)
+}
+
 func check(err error) {
 	if err != nil {
-		panic(err)
+		exitWith(err, 1)
 	}
 }
