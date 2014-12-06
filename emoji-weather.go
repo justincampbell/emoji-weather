@@ -27,10 +27,10 @@ var conditionIcons = map[string]string{
 }
 
 var maxCacheAge, _ = time.ParseDuration("1h")
-var cache_file = path.Join(os.TempDir(), "emoji-weather.json")
 
 func main() {
 	coordinates := flag.String("coordinates", "39.95,-75.1667", "the coordinates, expressed as latitude,longitude")
+	tmpDir := flag.String("tmpdir", os.TempDir(), "the directory to use to store cached responses")
 	flag.Parse()
 
 	coordinateParts := strings.Split(*coordinates, ",")
@@ -44,25 +44,28 @@ func main() {
 		longitude = coordinateParts[1]
 	}
 
+	var cacheFilename = fmt.Sprintf("emoji-weather-%s-%s.json", latitude, longitude)
+	var cacheFile = path.Join(*tmpDir, cacheFilename)
+
 	var json []byte
 	var err error
 
-	if isCacheStale(cache_file) {
+	if isCacheStale(cacheFile) {
 		json, err = getForecast(latitude, longitude)
 		check(err)
 
-		err = writeCache(cache_file, json)
+		err = writeCache(cacheFile, json)
 		check(err)
 	} else {
-		json, err = ioutil.ReadFile(cache_file)
+		json, err = ioutil.ReadFile(cacheFile)
 		check(err)
 	}
 
 	fmt.Println(formatConditions(extractConditionFromJSON(json)))
 }
 
-func isCacheStale(cache_file string) bool {
-	stat, err := os.Stat(cache_file)
+func isCacheStale(cacheFile string) bool {
+	stat, err := os.Stat(cacheFile)
 
 	return os.IsNotExist(err) || time.Since(stat.ModTime()) > maxCacheAge
 }
@@ -87,8 +90,8 @@ func getForecast(latitude string, longitude string) (json []byte, err error) {
 	return json, nil
 }
 
-func writeCache(cache_file string, json []byte) (err error) {
-	return ioutil.WriteFile(cache_file, json, 0644)
+func writeCache(cacheFile string, json []byte) (err error) {
+	return ioutil.WriteFile(cacheFile, json, 0644)
 }
 
 func formatConditions(condition string) (icon string) {
