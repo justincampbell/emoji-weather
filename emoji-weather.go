@@ -30,6 +30,12 @@ var maxCacheAge, _ = time.ParseDuration("1h")
 func main() {
 	coordinates := flag.String("coordinates", "39.95,-75.1667", "the coordinates, expressed as latitude,longitude")
 	tmpDir := flag.String("tmpdir", os.TempDir(), "the directory to use to store cached responses")
+	key := flag.String("key", os.Getenv("FORECAST_IO_API_KEY"), "your forecast.io API key")
+
+	if *key == "" {
+		exitWith("Please provide your forecast.io API key with -key, or set FORECAST_IO_API_KEY", 1)
+	}
+
 	flag.Parse()
 
 	coordinateParts := strings.Split(*coordinates, ",")
@@ -50,7 +56,7 @@ func main() {
 	var err error
 
 	if isCacheStale(cacheFile) {
-		json, err = getForecast(latitude, longitude)
+		json, err = getForecast(*key, latitude, longitude)
 		check(err)
 
 		err = writeCache(cacheFile, json)
@@ -69,13 +75,7 @@ func isCacheStale(cacheFile string) bool {
 	return os.IsNotExist(err) || time.Since(stat.ModTime()) > maxCacheAge
 }
 
-func getForecast(latitude string, longitude string) (json []byte, err error) {
-	key := os.Getenv("FORECAST_IO_API_KEY")
-
-	if key == "" {
-		exitWith("Please set FORECAST_IO_API_KEY to your forecast.io API key", 1)
-	}
-
+func getForecast(key string, latitude string, longitude string) (json []byte, err error) {
 	res, err := forecast.GetResponse(key, latitude, longitude, "now", "us")
 	if err != nil {
 		return nil, err
