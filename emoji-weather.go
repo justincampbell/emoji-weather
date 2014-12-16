@@ -16,7 +16,7 @@ var conditionIcons = map[string]string{
 	"clear-day":           "☀️",
 	"clear-night":         "🌙",
 	"cloudy":              "☁️",
-	"fog":                 "fog",
+	"fog":                 "🌁",
 	"partly-cloudy-day":   "⛅️",
 	"partly-cloudy-night": "🌙",
 	"rain":                "☔️",
