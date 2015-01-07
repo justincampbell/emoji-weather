@@ -55,10 +55,10 @@ func main() {
 
 	if isCacheStale(cacheFile) {
 		json, err = getForecast(*key, latitude, longitude)
-		check(err)
-
-		err = writeCache(cacheFile, json)
-		check(err)
+		if err == nil {
+			err = writeCache(cacheFile, json)
+			check(err)
+		}
 	} else {
 		json, err = ioutil.ReadFile(cacheFile)
 		check(err)
