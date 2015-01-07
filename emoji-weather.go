@@ -39,18 +39,16 @@ func main() {
 	flag.Parse()
 
 	coordinateParts := strings.Split(*coordinates, ",")
-	var latitude string
-	var longitude string
 
 	if len(coordinateParts) != 2 {
 		exitWith("You must specify latitude and longitude like so: 39.95,-75.1667", 1)
-	} else {
-		latitude = coordinateParts[0]
-		longitude = coordinateParts[1]
 	}
 
-	var cacheFilename = fmt.Sprintf("emoji-weather-%s-%s.json", latitude, longitude)
-	var cacheFile = path.Join(*tmpDir, cacheFilename)
+	latitude := coordinateParts[0]
+	longitude := coordinateParts[1]
+
+	cacheFilename := fmt.Sprintf("emoji-weather-%s-%s.json", latitude, longitude)
+	cacheFile := path.Join(*tmpDir, cacheFilename)
 
 	var json []byte
 	var err error
