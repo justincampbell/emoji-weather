@@ -23,6 +23,7 @@ var conditionIcons = map[string]string{
 	"sleet":               "❄️ ☔️",
 	"snow":                "❄️",
 	"wind":                "🍃",
+	"error":               "❗️",
 }
 
 var maxCacheAge, _ = time.ParseDuration("1h")
@@ -105,7 +106,11 @@ func extractConditionFromJSON(jsonBlob []byte) (condition string) {
 		return "❗️"
 	}
 
-	return f.Currently.Icon
+	if f.Code > 0 {
+		return "error"
+	} else {
+		return f.Currently.Icon
+	}
 }
 
 func exitWith(message interface{}, status int) {

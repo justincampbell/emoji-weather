@@ -9,7 +9,7 @@ load test_helper
 }
 
 @test "show exclamation point on failure" {
-  run $ew -coordinates "0,0"
+  run $ew -coordinates "1000,0"
 
   echo $output | grep "❗️"
   [ $status -eq 0 ]
