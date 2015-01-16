@@ -7,3 +7,10 @@ load test_helper
 
   echo $output | grep "☀️"
 }
+
+@test "show exclamation point on failure" {
+  run $ew -coordinates "1000,0"
+
+  echo $output | grep "❗️"
+  [ $status -eq 0 ]
+}
