@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/justincampbell/forecast/v2"
+	"github.com/mlbright/forecast/v2"
 )
 
 var conditionIcons = map[string]string{
