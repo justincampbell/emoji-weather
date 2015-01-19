@@ -1,0 +1,13 @@
+language: go
+before_script:
+  - git clone --depth 1 https://github.com/sstephenson/bats.git
+  - export PATH=$PATH:bats/bin
+  - go get golang.org/x/tools/cmd/cover
+go:
+  - 1.4
+  - tip
+install:
+  - go get -t
+matrix:
+  allow_failures:
+    - go: tip
