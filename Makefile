@@ -48,7 +48,7 @@ unit: dependencies
 	go test -coverprofile=$(COVERAGE_FILE) -timeout 25ms
 
 dependencies:
-	go get -d -t -u
+	go get -t
 	go get golang.org/x/tools/cmd/cover
 
 .PHONY: acceptance build coverage dependencies install release sha tag test uninstall unit
