@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/bmizerany/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_formatConditions(t *testing.T) {
