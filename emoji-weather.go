@@ -28,18 +28,24 @@ var conditionIcons = map[string]string{
 
 var maxCacheAge, _ = time.ParseDuration("1h")
 
-func main() {
-	coordinates := flag.String("coordinates", "39.95,-75.1667", "the coordinates, expressed as latitude,longitude")
-	tmpDir := flag.String("tmpdir", os.TempDir(), "the directory to use to store cached responses")
-	key := flag.String("key", os.Getenv("FORECAST_IO_API_KEY"), "your forecast.io API key")
+var coordinates string
+var key string
+var tmpDir string
 
-	if *key == "" {
+func init() {
+	flag.StringVar(&coordinates, "coordinates", "39.95,-75.1667", "the coordinates, expressed as latitude,longitude")
+	flag.StringVar(&key, "key", os.Getenv("FORECAST_IO_API_KEY"), "your forecast.io API key")
+	flag.StringVar(&tmpDir, "tmpdir", os.TempDir(), "the directory to use to store cached responses")
+
+	flag.Parse()
+}
+
+func main() {
+	if key == "" {
 		exitWith("Please provide your forecast.io API key with -key, or set FORECAST_IO_API_KEY", 1)
 	}
 
-	flag.Parse()
-
-	coordinateParts := strings.Split(*coordinates, ",")
+	coordinateParts := strings.Split(coordinates, ",")
 
 	if len(coordinateParts) != 2 {
 		exitWith("You must specify latitude and longitude like so: 39.95,-75.1667", 1)
@@ -49,17 +55,17 @@ func main() {
 	longitude := coordinateParts[1]
 
 	cacheFilename := fmt.Sprintf("emoji-weather-%s-%s.json", latitude, longitude)
-	cacheFile := path.Join(*tmpDir, cacheFilename)
+	cacheFile := path.Join(tmpDir, cacheFilename)
 
 	var json []byte
 	var err error
 
 	if isCacheStale(cacheFile) {
-		json, err = getForecast(*key, latitude, longitude)
-		if err == nil {
-			err = writeCache(cacheFile, json)
-			check(err)
-		}
+		json, err = getForecast(key, latitude, longitude)
+		check(err)
+
+		err = writeCache(cacheFile, json)
+		check(err)
 	} else {
 		json, err = ioutil.ReadFile(cacheFile)
 		check(err)
