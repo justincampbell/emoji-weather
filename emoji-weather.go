@@ -52,19 +52,19 @@ func main() {
 		exitWith("Please provide your forecast.io API key with -key, or set FORECAST_IO_API_KEY", 1)
 	}
 
-	if coordinates != "" {
-		coordinateParts := strings.Split(coordinates, ",")
-
-		if len(coordinateParts) != 2 {
-			exitWith("You must specify latitude and longitude like so: 39.95,-75.1667", 1)
-		}
-
-		latitude, longitude = coordinateParts[0], coordinateParts[1]
-	} else if zipCode != "" {
+	if zipCode != "" {
 		coord, err := zipcode.Lookup(zipCode)
 		check(err)
-		latitude, longitude = coord.Lat, coord.Long
+		coordinates = coord.String()
 	}
+
+	coordinateParts := strings.Split(coordinates, ",")
+
+	if len(coordinateParts) != 2 {
+		exitWith("You must specify latitude and longitude like so: 39.95,-75.1667", 1)
+	}
+
+	latitude, longitude = coordinateParts[0], coordinateParts[1]
 
 	cacheFilename := fmt.Sprintf("emoji-weather-%s-%s.json", latitude, longitude)
 	cacheFile := path.Join(tmpDir, cacheFilename)
