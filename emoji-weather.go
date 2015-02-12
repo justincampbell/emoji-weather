@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/justincampbell/zipcode"
 	"github.com/mlbright/forecast/v2"
 )
 
@@ -31,34 +32,44 @@ var maxCacheAge, _ = time.ParseDuration("1h")
 var coordinates string
 var key string
 var tmpDir string
+var zipCode string
 
 func init() {
-	flag.StringVar(&coordinates, "coordinates", "39.95,-75.1667", "the coordinates, expressed as latitude,longitude")
+	flag.StringVar(&coordinates, "coordinates", "", "the coordinates, expressed as latitude,longitude")
 	flag.StringVar(&key, "key", os.Getenv("FORECAST_IO_API_KEY"), "your forecast.io API key")
 	flag.StringVar(&tmpDir, "tmpdir", os.TempDir(), "the directory to use to store cached responses")
+	flag.StringVar(&zipCode, "zipcode", "", "a USPS ZIP Code")
 
 	flag.Parse()
 }
 
 func main() {
+	var err error
+	var latitude string
+	var longitude string
+
 	if key == "" {
 		exitWith("Please provide your forecast.io API key with -key, or set FORECAST_IO_API_KEY", 1)
 	}
 
-	coordinateParts := strings.Split(coordinates, ",")
+	if coordinates != "" {
+		coordinateParts := strings.Split(coordinates, ",")
 
-	if len(coordinateParts) != 2 {
-		exitWith("You must specify latitude and longitude like so: 39.95,-75.1667", 1)
+		if len(coordinateParts) != 2 {
+			exitWith("You must specify latitude and longitude like so: 39.95,-75.1667", 1)
+		}
+
+		latitude, longitude = coordinateParts[0], coordinateParts[1]
+	} else if zipCode != "" {
+		coord, err := zipcode.Lookup(zipCode)
+		check(err)
+		latitude, longitude = coord.Lat, coord.Long
 	}
-
-	latitude := coordinateParts[0]
-	longitude := coordinateParts[1]
 
 	cacheFilename := fmt.Sprintf("emoji-weather-%s-%s.json", latitude, longitude)
 	cacheFile := path.Join(tmpDir, cacheFilename)
 
 	var json []byte
-	var err error
 
 	if isCacheStale(cacheFile) {
 		json, err = getForecast(key, latitude, longitude)
