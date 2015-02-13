@@ -52,6 +52,10 @@ func main() {
 		exitWith("Please provide your forecast.io API key with -key, or set FORECAST_IO_API_KEY", 1)
 	}
 
+	if coordinates == "" && zipCode == "" {
+		exitWith("Please provide a -zipcode or -coordinates", 1)
+	}
+
 	if zipCode != "" {
 		coord, err := zipcode.Lookup(zipCode)
 		check(err)
