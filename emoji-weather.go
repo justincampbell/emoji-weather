@@ -108,15 +108,16 @@ func formatConditions(condition string) (icon string) {
 
 func extractConditionFromJSON(jsonBlob []byte) (condition string) {
 	f, err := forecast.FromJSON(jsonBlob)
+
 	if err != nil {
 		return "❗️"
 	}
 
 	if f.Code > 0 {
 		return "error"
-	} else {
-		return f.Currently.Icon
 	}
+
+	return f.Currently.Icon
 }
 
 func exitWith(message interface{}, status int) {
