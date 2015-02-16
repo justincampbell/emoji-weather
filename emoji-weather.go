@@ -110,7 +110,7 @@ func extractConditionFromJSON(jsonBlob []byte) (condition string) {
 	f, err := forecast.FromJSON(jsonBlob)
 
 	if err != nil {
-		return "❗️"
+		return "error"
 	}
 
 	if f.Code > 0 {
