@@ -1,4 +1,4 @@
-# emoji-weather [![Build Status](https://travis-ci.org/justincampbell/emoji-weather.svg?branch=conversion)](https://travis-ci.org/justincampbell/emoji-weather)
+# emoji-weather [![Build Status](https://travis-ci.org/justincampbell/emoji-weather.svg?branch=master)](https://travis-ci.org/justincampbell/emoji-weather)
 
 The current weather expressed as Emoji.
 
