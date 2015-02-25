@@ -16,6 +16,14 @@ load test_helper
   echo $output | grep "☀️"
 }
 
+@test "temperature display" {
+  fixture emoji-weather-39.951735--75.158654.json
+
+  run $ew -temp=f -zipcode "19107"
+
+  echo $output | grep "☀️ 49°"
+}
+
 @test "show exclamation point on failure" {
   run $ew -coordinates "1000,0"
 

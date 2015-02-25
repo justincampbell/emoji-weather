@@ -30,12 +30,14 @@ var conditionIcons = map[string]string{
 var maxCacheAge, _ = time.ParseDuration("1h")
 
 var coordinates string
+var tempFormat string
 var key string
 var tmpDir string
 var zipCode string
 
 func init() {
 	flag.StringVar(&coordinates, "coordinates", "", "the coordinates, expressed as latitude,longitude")
+	flag.StringVar(&tempFormat, "temp", "", "display temperature in c or f")
 	flag.StringVar(&key, "key", os.Getenv("FORECAST_IO_API_KEY"), "your forecast.io API key")
 	flag.StringVar(&tmpDir, "tmpdir", os.TempDir(), "the directory to use to store cached responses")
 	flag.StringVar(&zipCode, "zipcode", "", "a USPS ZIP Code")
@@ -50,6 +52,10 @@ func main() {
 
 	if key == "" {
 		exitWith("Please provide your forecast.io API key with -key, or set FORECAST_IO_API_KEY", 1)
+	}
+
+	if tempFormat != "" && tempFormat != "c" && tempFormat != "f" {
+		exitWith("The -temp argument must be 'c' or 'f'", 1)
 	}
 
 	if coordinates == "" && zipCode == "" {
@@ -113,26 +119,37 @@ func writeCache(cacheFile string, json []byte) (err error) {
 	return ioutil.WriteFile(cacheFile, json, 0644)
 }
 
-func formatConditions(condition string) (icon string) {
-	icon, ok := conditionIcons[condition]
+func formatConditions(condition string, temperature float64) (result string) {
+	result, ok := conditionIcons[condition]
 	if !ok {
-		icon = condition
+		result = condition
+	}
+	if tempFormat == "c" {
+		temperature = convertToCelcius(temperature)
+		result = fmt.Sprintf("%s %.1f°", result, temperature)
+	}
+	if tempFormat == "f" {
+		result = fmt.Sprintf("%s %.0f°", result, temperature)
 	}
 	return
 }
 
-func extractConditionFromJSON(jsonBlob []byte) (condition string) {
+func convertToCelcius(temperature float64) float64 {
+	return (temperature - 32) * 5 / 9
+}
+
+func extractConditionFromJSON(jsonBlob []byte) (condition string, temperature float64) {
 	f, err := forecast.FromJSON(jsonBlob)
 
 	if err != nil {
-		return "error"
+		return "error", 0.0
 	}
 
 	if f.Code > 0 {
-		return "error"
+		return "error", 0.0
 	}
 
-	return f.Currently.Icon
+	return f.Currently.Icon, f.Currently.Temperature
 }
 
 func exitWith(message interface{}, status int) {
