@@ -153,7 +153,7 @@ func extractConditionFromJSON(jsonBlob []byte) (condition string, temperature fl
 }
 
 func exitWith(message interface{}, status int) {
-	fmt.Printf("%v\n", message)
+	fmt.Printf("❗️\n%v\n", message)
 	os.Exit(status)
 }
 
