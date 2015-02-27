@@ -3,7 +3,7 @@ PREFIX=/usr/local
 
 COVERAGE_FILE = coverage.out
 
-VERSION=0.2.0
+VERSION=0.2.1
 TAG=v$(VERSION)
 
 ARCHIVE=emoji-weather-$(TAG).tar.gz
