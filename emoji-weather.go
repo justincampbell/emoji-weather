@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -46,10 +47,6 @@ func init() {
 }
 
 func main() {
-	var err error
-	var latitude string
-	var longitude string
-
 	if key == "" {
 		exitWith("Please provide your forecast.io API key with -key, or set FORECAST_IO_API_KEY", 1)
 	}
@@ -68,17 +65,12 @@ func main() {
 		coordinates = coord.String()
 	}
 
-	coordinateParts := strings.Split(coordinates, ",")
-
-	if len(coordinateParts) != 2 {
-		exitWith("You must specify latitude and longitude like so: 39.95,-75.1667", 1)
-	}
-
-	latitude, longitude = coordinateParts[0], coordinateParts[1]
+	latitude, longitude := formatCoordinates(coordinates)
 
 	cacheFilename := fmt.Sprintf("emoji-weather-%s-%s.json", latitude, longitude)
 	cacheFile := path.Join(tmpDir, cacheFilename)
 
+	var err error
 	var json []byte
 
 	if isCacheStale(cacheFile) {
@@ -93,6 +85,27 @@ func main() {
 	}
 
 	fmt.Println(formatConditions(extractConditionFromJSON(json)))
+}
+
+func formatCoordinates(coordinates string) (latitude string, longitude string) {
+	coordinateParts := strings.Split(coordinates, ",")
+
+	if len(coordinateParts) != 2 {
+		exitWith("You must specify latitude and longitude like so: 39.95,-75.16", 1)
+	}
+
+	latitude = roundCoordinatePart(coordinateParts[0])
+	longitude = roundCoordinatePart(coordinateParts[1])
+
+	return
+}
+
+func roundCoordinatePart(part string) string {
+	float, err := strconv.ParseFloat(part, 32)
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%.2f", float)
 }
 
 func isCacheStale(cacheFile string) bool {
