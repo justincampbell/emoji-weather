@@ -1,7 +1,7 @@
 load test_helper
 
 @test "it's always sunny in Philadelphia with coordinates" {
-  fixture emoji-weather-39.951735--75.158654.json
+  fixture emoji-weather-39.95--75.16.json
 
   run $ew -coordinates "39.951735,-75.158654"
 
@@ -9,7 +9,7 @@ load test_helper
 }
 
 @test "it's always sunny in Philadelphia with ZIP Code" {
-  fixture emoji-weather-39.951735--75.158654.json
+  fixture emoji-weather-39.95--75.16.json
 
   run $ew -zipcode "19107"
 
@@ -17,7 +17,7 @@ load test_helper
 }
 
 @test "temperature display" {
-  fixture emoji-weather-39.951735--75.158654.json
+  fixture emoji-weather-39.95--75.16.json
 
   run $ew -temp=f -zipcode "19107"
 
