@@ -2,6 +2,16 @@
 
 The current weather expressed as Emoji.
 
+## Installation
+
+Download the latest binary for you platform from the [Releases page](https://github.com/justincampbell/emoji-weather/releases/latest), and place the file in your $PATH. For most systems, this will be `/usr/bin/local'.
+
+Or, if you have a [Go development environment](https://golang.org/doc/install):
+
+```sh
+go get github.com/justincampbell/emoji-weather
+```
+
 ## Usage
 
 1. Register for a [Forecast.io Developer Account](https://developer.forecast.io/)
