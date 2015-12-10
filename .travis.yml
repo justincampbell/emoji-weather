@@ -20,28 +20,15 @@ matrix:
 
 before_deploy:
   - go get github.com/mitchellh/gox
-  - gox
+  - cd bin/
+  - gox ../...
 
 deploy:
   provider: releases
   api_key:
     secure: SUBoX5zAsRLYshfpmK1aeVWMU7ZMnpVNa9YqDi4QP95iNhuw28Dhl5uqORoGnog4AhN8X3cdJTOYB0QA7nboBvm+OytDaHCOpzV5CNHVrQ/fjMZmsgQW0UoweWjDUWtlDHSpMa3XywAoVkGxLEp9hAWom/MIWVAOOWueuKEYxCo=
-  file:
-    - emoji-weather_darwin_386
-    - emoji-weather_darwin_amd64
-    - emoji-weather_freebsd_386
-    - emoji-weather_freebsd_amd64
-    - emoji-weather_freebsd_arm
-    - emoji-weather_linux_386
-    - emoji-weather_linux_amd64
-    - emoji-weather_linux_arm
-    - emoji-weather_netbsd_386
-    - emoji-weather_netbsd_amd64
-    - emoji-weather_netbsd_arm
-    - emoji-weather_openbsd_386
-    - emoji-weather_openbsd_amd64
-    - emoji-weather_windows_386.exe
-    - emoji-weather_windows_amd64.exe
+  file: emoji-weather_*
+  file_glob: true
   skip_cleanup: true
   on:
     repo: justincampbell/emoji-weather
