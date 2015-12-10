@@ -15,3 +15,18 @@ install:
 matrix:
   allow_failures:
     - go: tip
+
+before_deploy:
+  - go get github.com/mitchellh/gox
+  - cd bin/
+  - gox ../...
+
+deploy:
+  provider: releases
+  api_key:
+    secure: SUBoX5zAsRLYshfpmK1aeVWMU7ZMnpVNa9YqDi4QP95iNhuw28Dhl5uqORoGnog4AhN8X3cdJTOYB0QA7nboBvm+OytDaHCOpzV5CNHVrQ/fjMZmsgQW0UoweWjDUWtlDHSpMa3XywAoVkGxLEp9hAWom/MIWVAOOWueuKEYxCo=
+  file: bin/emoji-weather_*
+  file_glob: true
+  on:
+    repo: justincampbell/emoji-weather
+    # tags: true
