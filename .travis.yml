@@ -29,4 +29,4 @@ deploy:
   file_glob: true
   on:
     repo: justincampbell/emoji-weather
-    # tags: true
+    tags: true
