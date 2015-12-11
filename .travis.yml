@@ -20,7 +20,8 @@ matrix:
 
 before_deploy:
   - go get github.com/mitchellh/gox
-  - cd bin/
+  - mkdir -p release/
+  - cd release/
   - gox ../...
 
 deploy:
