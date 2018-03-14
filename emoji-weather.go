@@ -1,7 +1,7 @@
 package main
 
 import (
-        "bytes"
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
