@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -115,7 +116,7 @@ func isCacheStale(cacheFile string) bool {
 }
 
 func getForecast(key string, latitude string, longitude string) (json []byte, err error) {
-	res, err := forecast.GetResponse(key, latitude, longitude, "now", "us")
+	res, err := forecast.GetResponse(key, latitude, longitude, "now", forecast.US, forecast.English)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +153,7 @@ func convertToCelcius(temperature float64) float64 {
 }
 
 func extractConditionFromJSON(jsonBlob []byte) (condition string, temperature float64) {
-	f, err := forecast.FromJSON(jsonBlob)
+	f, err := forecast.FromJSON(bytes.NewReader(jsonBlob))
 
 	if err != nil {
 		return "error", 0.0
