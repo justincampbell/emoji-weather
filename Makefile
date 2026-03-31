@@ -1,18 +1,22 @@
-.PHONY: build test install clean
+VERSION ?= $(shell git describe --tags --dirty --always | sed 's/-[0-9]*-g/-g/')
+LDFLAGS := -X main.version=$(VERSION)
+GOLANGCI_LINT_VERSION := v2.11.4
 
-BINARY  := emoji-weather
-BIN_DIR := bin
-VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+.PHONY: all build install test lint clean
+
+all: lint test
 
 build:
-	mkdir -p $(BIN_DIR)
-	go build -ldflags="-X main.version=$(VERSION)" -o $(BIN_DIR)/$(BINARY) .
+	go build -ldflags "$(LDFLAGS)" -o emoji-weather .
+
+install:
+	go install -ldflags "$(LDFLAGS)" .
 
 test:
 	go test ./...
 
-install: build
-	cp $(BIN_DIR)/$(BINARY) /usr/local/bin/$(BINARY)
+lint:
+	go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run ./...
 
 clean:
-	rm -rf $(BIN_DIR)
+	rm -f emoji-weather
