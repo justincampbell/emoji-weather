@@ -1,9 +1,13 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/justincampbell/emoji-weather/providers"
+)
 
 func TestFormat(t *testing.T) {
-	c := Conditions{
+	c := providers.Conditions{
 		Icon:        "⛅",
 		Description: "Partly cloudy",
 		TempF:       75.0,
@@ -20,17 +24,17 @@ func TestFormat(t *testing.T) {
 		units  string
 		want   string
 	}{
-		{"icon and temp US", "%c %t", "u", "⛅ 75°F"},
-		{"icon and temp metric", "%c %t", "m", "⛅ 24°C"},
-		{"description", "%C", "u", "Partly cloudy"},
-		{"feels like US", "%f", "u", "72°F"},
-		{"feels like metric", "%f", "m", "22°C"},
-		{"humidity", "%h", "u", "50%"},
-		{"location", "%l", "u", "New York"},
-		{"literal percent", "100%%", "u", "100%"},
-		{"unknown code passthrough", "%x", "u", "%x"},
-		{"combined", "%c %t · %h", "u", "⛅ 75°F · 50%"},
-		{"trailing percent", "test%", "u", "test%"},
+		{"icon and temp US", "%c %t", "f", "⛅ 75°F"},
+		{"icon and temp metric", "%c %t", "c", "⛅ 24°C"},
+		{"description", "%C", "f", "Partly cloudy"},
+		{"feels like US", "%f", "f", "72°F"},
+		{"feels like metric", "%f", "c", "22°C"},
+		{"humidity", "%h", "f", "50%"},
+		{"location", "%l", "f", "New York"},
+		{"literal percent", "100%%", "f", "100%"},
+		{"unknown code passthrough", "%x", "f", "%x"},
+		{"combined", "%c %t · %h", "f", "⛅ 75°F · 50%"},
+		{"trailing percent", "test%", "f", "test%"},
 	}
 
 	for _, tt := range tests {

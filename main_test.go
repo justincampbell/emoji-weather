@@ -6,19 +6,21 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/justincampbell/emoji-weather/providers"
 )
 
-// mockProvider implements Provider for testing.
+// mockProvider implements providers.Provider for testing.
 type mockProvider struct {
 	name       string
-	conditions Conditions
+	conditions providers.Conditions
 	err        error
 	callCount  int
 }
 
 func (m *mockProvider) Name() string { return m.name }
 
-func (m *mockProvider) Get(location string, timeout time.Duration) (Conditions, error) {
+func (m *mockProvider) Get(location string, timeout time.Duration) (providers.Conditions, error) {
 	m.callCount++
 	return m.conditions, m.err
 }
@@ -27,10 +29,10 @@ func TestGetCachedConditions_FetchesOnMiss(t *testing.T) {
 	dir := t.TempDir()
 	p := &mockProvider{
 		name:       "test",
-		conditions: Conditions{Icon: "☀️", TempF: 80},
+		conditions: providers.Conditions{Icon: "☀️", TempF: 80},
 	}
 
-	got, err := getCachedConditions(p, "NYC", "u", time.Hour, 5*time.Second, dir)
+	got, err := getCachedConditions(p, "NYC", "f", time.Hour, 5*time.Second, dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -46,18 +48,18 @@ func TestGetCachedConditions_UsesCache(t *testing.T) {
 	dir := t.TempDir()
 	p := &mockProvider{
 		name:       "test",
-		conditions: Conditions{Icon: "☀️", TempF: 80},
+		conditions: providers.Conditions{Icon: "☀️", TempF: 80},
 	}
 
 	// First call populates cache.
-	_, err := getCachedConditions(p, "NYC", "u", time.Hour, 5*time.Second, dir)
+	_, err := getCachedConditions(p, "NYC", "f", time.Hour, 5*time.Second, dir)
 	if err != nil {
 		t.Fatalf("first call error: %v", err)
 	}
 
 	// Second call should use cache, not call provider.
-	p.conditions = Conditions{Icon: "⛈️", TempF: 55}
-	got, err := getCachedConditions(p, "NYC", "u", time.Hour, 5*time.Second, dir)
+	p.conditions = providers.Conditions{Icon: "⛈️", TempF: 55}
+	got, err := getCachedConditions(p, "NYC", "f", time.Hour, 5*time.Second, dir)
 	if err != nil {
 		t.Fatalf("second call error: %v", err)
 	}
@@ -73,17 +75,17 @@ func TestGetCachedConditions_RefetchesOnExpiry(t *testing.T) {
 	dir := t.TempDir()
 	p := &mockProvider{
 		name:       "test",
-		conditions: Conditions{Icon: "☀️", TempF: 80},
+		conditions: providers.Conditions{Icon: "☀️", TempF: 80},
 	}
 
 	// Write a cache file with an old mtime.
-	cachePath := filepath.Join(dir, "tmux-weather."+conditionsCacheKey("test", "NYC", "u"))
+	cachePath := filepath.Join(dir, "emoji-weather."+conditionsCacheKey("test", "NYC", "f"))
 	_ = saveConditions(cachePath, p.conditions)
 	oldTime := time.Now().Add(-2 * time.Hour)
 	_ = os.Chtimes(cachePath, oldTime, oldTime)
 
-	p.conditions = Conditions{Icon: "⛈️", TempF: 55}
-	got, err := getCachedConditions(p, "NYC", "u", time.Hour, 5*time.Second, dir)
+	p.conditions = providers.Conditions{Icon: "⛈️", TempF: 55}
+	got, err := getCachedConditions(p, "NYC", "f", time.Hour, 5*time.Second, dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -102,24 +104,24 @@ func TestGetCachedConditions_PropagatesProviderError(t *testing.T) {
 		err:  errors.New("network unreachable"),
 	}
 
-	_, err := getCachedConditions(p, "", "u", time.Hour, 5*time.Second, dir)
+	_, err := getCachedConditions(p, "", "f", time.Hour, 5*time.Second, dir)
 	if err == nil {
 		t.Error("expected error from provider")
 	}
 }
 
 func TestConditionsCacheKey_Deterministic(t *testing.T) {
-	k1 := conditionsCacheKey("wttr", "NYC", "u")
-	k2 := conditionsCacheKey("wttr", "NYC", "u")
+	k1 := conditionsCacheKey("wttr", "NYC", "f")
+	k2 := conditionsCacheKey("wttr", "NYC", "f")
 	if k1 != k2 {
 		t.Error("cache key not deterministic")
 	}
 }
 
 func TestConditionsCacheKey_DifferentInputs(t *testing.T) {
-	k1 := conditionsCacheKey("wttr", "NYC", "u")
-	k2 := conditionsCacheKey("wttr", "NYC", "m")
-	k3 := conditionsCacheKey("wttr", "London", "u")
+	k1 := conditionsCacheKey("wttr", "NYC", "f")
+	k2 := conditionsCacheKey("wttr", "NYC", "c")
+	k3 := conditionsCacheKey("wttr", "London", "f")
 	if k1 == k2 || k1 == k3 || k2 == k3 {
 		t.Error("different inputs should produce different cache keys")
 	}
@@ -153,8 +155,8 @@ func TestCacheStale_ExpiredFile(t *testing.T) {
 	}
 }
 
-func TestNewProvider_Known(t *testing.T) {
-	p, err := newProvider("wttr")
+func TestNewProvider_Wttr(t *testing.T) {
+	p, err := newProvider("wttr", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -163,8 +165,25 @@ func TestNewProvider_Known(t *testing.T) {
 	}
 }
 
+func TestNewProvider_OpenWeatherMap(t *testing.T) {
+	p, err := newProvider("openweathermap", "testkey")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if p.Name() != "openweathermap" {
+		t.Errorf("Name() = %q, want openweathermap", p.Name())
+	}
+}
+
+func TestNewProvider_OpenWeatherMapNoKey(t *testing.T) {
+	_, err := newProvider("openweathermap", "")
+	if err == nil {
+		t.Error("expected error when no API key provided")
+	}
+}
+
 func TestNewProvider_Unknown(t *testing.T) {
-	_, err := newProvider("nonexistent")
+	_, err := newProvider("nonexistent", "")
 	if err == nil {
 		t.Error("expected error for unknown provider")
 	}

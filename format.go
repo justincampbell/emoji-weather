@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/justincampbell/emoji-weather/providers"
 )
 
 // Format renders a format string using weather conditions.
@@ -17,8 +19,8 @@ import (
 //	%l  - location name
 //	%%  - literal percent sign
 //
-// Units: "u" for US/imperial (°F), "m" for metric (°C).
-func Format(format string, c Conditions, units string) string {
+// Units: "f" for Fahrenheit (°F), "c" for Celsius (°C).
+func Format(format string, c providers.Conditions, units string) string {
 	var result strings.Builder
 	i := 0
 	for i < len(format) {
@@ -53,7 +55,7 @@ func Format(format string, c Conditions, units string) string {
 }
 
 func formatTemp(f, c float64, units string) string {
-	if units == "m" {
+	if units == "c" {
 		return fmt.Sprintf("%.0f°C", c)
 	}
 	return fmt.Sprintf("%.0f°F", f)

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# tmux-weather.tmux — tmux plugin entry point
+# emoji-weather.tmux — tmux plugin entry point
 #
 # Replaces #{weather_status} in status-right, status-left, and status-format
-# with a #(tmux-weather ...) shell command invocation.
+# with a #(emoji-weather ...) shell command invocation.
 #
 # Configuration (set in tmux.conf):
 #   set -g @weather_location  "10001"       # zip, city, lat,lon; default: auto
 #   set -g @weather_format    "%c %t"       # format string; default: "%c %t"
 #   set -g @weather_ttl       "30m"         # cache TTL; default: 30m
-#   set -g @weather_units     "u"           # u=imperial, m=metric; default: u
+#   set -g @weather_units     "f"           # f=Fahrenheit, c=Celsius; default: f
 #   set -g @weather_error_icon "❗"         # output on error; default: ❗
 #   set -g @weather_provider  "wttr"        # provider; default: wttr
 #
@@ -19,13 +19,13 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 find_binary() {
   # Prefer a binary built alongside the plugin (development / bundled installs).
-  if [ -x "$CURRENT_DIR/bin/tmux-weather" ]; then
-    echo "$CURRENT_DIR/bin/tmux-weather"
+  if [ -x "$CURRENT_DIR/bin/emoji-weather" ]; then
+    echo "$CURRENT_DIR/bin/emoji-weather"
     return
   fi
   # Fall back to whatever is on PATH (e.g. installed via Homebrew).
-  if command -v tmux-weather >/dev/null 2>&1; then
-    command -v tmux-weather
+  if command -v emoji-weather >/dev/null 2>&1; then
+    command -v emoji-weather
     return
   fi
   echo ""
@@ -77,7 +77,7 @@ main() {
   binary=$(find_binary)
 
   if [ -z "$binary" ]; then
-    tmux display-message "tmux-weather: binary not found — install via: brew install justincampbell/tap/tmux-weather"
+    tmux display-message "emoji-weather: binary not found — install via: brew install justincampbell/tap/emoji-weather"
     return 1
   fi
 

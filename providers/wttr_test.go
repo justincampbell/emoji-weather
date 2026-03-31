@@ -1,4 +1,4 @@
-package main
+package providers
 
 import "testing"
 
@@ -70,7 +70,7 @@ func TestParseWttrJSON_ErrorResponse(t *testing.T) {
 	}
 }
 
-func TestWeatherCodeToIcon_Known(t *testing.T) {
+func TestWttrCodeToIcon_Known(t *testing.T) {
 	tests := []struct {
 		code string
 		want string
@@ -81,15 +81,15 @@ func TestWeatherCodeToIcon_Known(t *testing.T) {
 		{"338", "❄️"},
 	}
 	for _, tt := range tests {
-		got := weatherCodeToIcon(tt.code)
+		got := wttrCodeToIcon(tt.code)
 		if got != tt.want {
-			t.Errorf("weatherCodeToIcon(%q) = %q, want %q", tt.code, got, tt.want)
+			t.Errorf("wttrCodeToIcon(%q) = %q, want %q", tt.code, got, tt.want)
 		}
 	}
 }
 
-func TestWeatherCodeToIcon_Unknown(t *testing.T) {
-	got := weatherCodeToIcon("9999")
+func TestWttrCodeToIcon_Unknown(t *testing.T) {
+	got := wttrCodeToIcon("9999")
 	if got == "" {
 		t.Error("expected fallback icon for unknown weather code")
 	}

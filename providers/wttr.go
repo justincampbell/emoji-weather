@@ -1,4 +1,4 @@
-package main
+package providers
 
 import (
 	"encoding/json"
@@ -13,10 +13,10 @@ import (
 const wttrBaseURL = "https://wttr.in"
 
 // WttrProvider fetches weather from wttr.in using its JSON API.
-type WttrProvider struct{}
+type WttrProvider struct{ version string }
 
-func NewWttrProvider() *WttrProvider {
-	return &WttrProvider{}
+func NewWttrProvider(version string) *WttrProvider {
+	return &WttrProvider{version: version}
 }
 
 func (p *WttrProvider) Name() string { return "wttr" }
@@ -35,7 +35,7 @@ func (p *WttrProvider) Get(location string, timeout time.Duration) (Conditions, 
 	q := req.URL.Query()
 	q.Set("format", "j1")
 	req.URL.RawQuery = q.Encode()
-	req.Header.Set("User-Agent", "tmux-weather/"+version)
+	req.Header.Set("User-Agent", "emoji-weather/"+p.version)
 
 	client := &http.Client{Timeout: timeout}
 	resp, err := client.Do(req)
@@ -114,7 +114,7 @@ func parseWttrJSON(data []byte) (Conditions, error) {
 	}
 
 	return Conditions{
-		Icon:        weatherCodeToIcon(cur.WeatherCode),
+		Icon:        wttrCodeToIcon(cur.WeatherCode),
 		Description: desc,
 		TempF:       tempF,
 		TempC:       tempC,
@@ -125,9 +125,9 @@ func parseWttrJSON(data []byte) (Conditions, error) {
 	}, nil
 }
 
-// weatherCodeToIcon maps wttr.in weather codes to emoji.
+// wttrCodeToIcon maps wttr.in weather codes to emoji.
 // See https://www.worldweatheronline.com/feed/wwo-weather-code.txt
-var weatherIcons = map[string]string{
+var wttrIcons = map[string]string{
 	"113": "☀️",  // Clear/Sunny
 	"116": "⛅",  // Partly cloudy
 	"119": "☁️",  // Cloudy
@@ -178,8 +178,8 @@ var weatherIcons = map[string]string{
 	"395": "⛈️", // Moderate or heavy snow with thunder
 }
 
-func weatherCodeToIcon(code string) string {
-	if icon, ok := weatherIcons[code]; ok {
+func wttrCodeToIcon(code string) string {
+	if icon, ok := wttrIcons[code]; ok {
 		return icon
 	}
 	return "🌡️"
