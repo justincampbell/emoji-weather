@@ -42,7 +42,7 @@ func (p *WttrProvider) Get(location string, timeout time.Duration) (Conditions, 
 	if err != nil {
 		return Conditions{}, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != 200 {
 		return Conditions{}, fmt.Errorf("HTTP %d from wttr.in", resp.StatusCode)

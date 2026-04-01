@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 const owmBaseURL = "https://api.openweathermap.org/data/2.5/weather"
@@ -44,7 +45,7 @@ func (p *OpenWeatherMapProvider) Get(location string, timeout time.Duration) (Co
 	if err != nil {
 		return Conditions{}, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != 200 {
 		return Conditions{}, fmt.Errorf("HTTP %d from openweathermap", resp.StatusCode)
@@ -106,7 +107,7 @@ func parseOWMJSON(data []byte) (Conditions, error) {
 	feelsF := feelsC*9/5 + 32
 
 	w := resp.Weather[0]
-	desc := strings.Title(w.Description)
+	desc := capitalizeFirst(w.Description)
 
 	return Conditions{
 		Icon:        owmIDToIcon(w.ID),
@@ -163,4 +164,13 @@ func owmIDToIcon(id int) string {
 		return "☁️" // Overcast
 	}
 	return "🌡️"
+}
+
+func capitalizeFirst(s string) string {
+	if s == "" {
+		return s
+	}
+	r := []rune(s)
+	r[0] = unicode.ToUpper(r[0])
+	return string(r)
 }

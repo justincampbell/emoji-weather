@@ -40,7 +40,7 @@ func Format(format string, c providers.Conditions, units string) string {
 		case 'f':
 			result.WriteString(formatTemp(c.FeelsLikeF, c.FeelsLikeC, units))
 		case 'h':
-			result.WriteString(fmt.Sprintf("%d%%", c.Humidity))
+			fmt.Fprintf(&result, "%d%%", c.Humidity)
 		case 'l':
 			result.WriteString(c.Location)
 		case '%':

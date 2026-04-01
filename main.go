@@ -149,7 +149,7 @@ func detectLocation(timeout time.Duration) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("IP location detection failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	var info struct {
 		Loc string `json:"loc"` // "lat,lon"
